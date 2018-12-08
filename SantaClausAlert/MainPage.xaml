@@ -27,6 +27,7 @@
             <RowDefinition Height="*" />
 
         </Grid.RowDefinitions>
+            <MediaElement x:Name="me"></MediaElement>
             <StackPanel Orientation="Horizontal" Margin="10">
         <Button Content="Open file"   VerticalAlignment="Top" Click="Button_Click" Margin="0,0,10,0"/>
                 <Button Content="Open Video"   VerticalAlignment="Top" Click="ButtonVideo_OnClick" Margin="0,0,10,0"/>

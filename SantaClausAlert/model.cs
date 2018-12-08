@@ -10,7 +10,8 @@ namespace SantaClausAlert
     
     public sealed class modelInput
     {
-        public ImageFeatureValue data; // BitmapPixelFormat: Bgra8, BitmapAlphaMode: Premultiplied, width: 227, height: 227
+        // BitmapPixelFormat: Bgra8, BitmapAlphaMode: Premultiplied, width: 227, height: 227
+        public ImageFeatureValue data; 
     }
     
     public sealed class modelOutput
@@ -28,7 +29,8 @@ namespace SantaClausAlert
         {
             modelModel learningModel = new modelModel();
             learningModel.model = await LearningModel.LoadFromStreamAsync(stream);
-            learningModel.session = new LearningModelSession(learningModel.model);
+            learningModel.session = new LearningModelSession(learningModel.model,
+                new LearningModelDevice(LearningModelDeviceKind.Default));
             learningModel.binding = new LearningModelBinding(learningModel.session);
             return learningModel;
         }
