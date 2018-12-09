@@ -44,26 +44,25 @@ namespace SantaClausAlert
         private async void CameraPreviewControl_FrameArrived(object sender, FrameEventArgs e)
 
         {
-            if (elaborate || DateTime.Now.Subtract(lastAlert).TotalSeconds < 1)
+            if (elaborate || DateTime.Now.Subtract(lastAlert).TotalSeconds < 10)
                 return;
+
+            //Read frame
             var videoFrame = e.VideoFrame;
-
             var softwareBitmap = e.VideoFrame.SoftwareBitmap;
-
             var targetSoftwareBitmap = softwareBitmap;
-
-
             if (softwareBitmap != null)
 
             {
+                //Convert to compatible bitmap
                 if (softwareBitmap.BitmapPixelFormat != BitmapPixelFormat.Bgra8 ||
                     softwareBitmap.BitmapAlphaMode == BitmapAlphaMode.Straight)
                     targetSoftwareBitmap = SoftwareBitmap.Convert(softwareBitmap, BitmapPixelFormat.Bgra8,
                         BitmapAlphaMode.Premultiplied);
 
-
                 var inputImage = VideoFrame.CreateWithSoftwareBitmap(targetSoftwareBitmap);
 
+                //Evaluate frame
                 EvaluateVideoFrameAsync(inputImage);
 
                 //await softwareBitmapSource.SetBitmapAsync(targetSoftwareBitmap);
@@ -73,15 +72,21 @@ namespace SantaClausAlert
         private async void EvaluateVideoFrameAsync(VideoFrame inputImage)
         {
             elaborate = true;
+            //Image crop to required size
             ModelInput.data = ImageFeatureValue.CreateFromVideoFrame(await CenterCropImageAsync(inputImage, 227, 227));
 
             //Evaluate the model
             ModelOutput = await ModelGen.EvaluateAsync(ModelInput);
+
+            //Convert result
             var res = ModelOutput.ClassLabel.GetAsVectorView().ToList();
+
+            //If no results
             if (ModelOutput.Loss == null || ModelOutput.Loss.Count == 0)
                 return;
             var loss = ModelOutput.Loss.ToList()[0];
 
+            //Find max
             var maxValue = loss.Values.Max();
             if (maxValue > 0.7)
             {
@@ -94,41 +99,20 @@ namespace SantaClausAlert
                     () =>
 
                     {
-
-                        
                         //Get current image
-
                         var m = new Image();
-
                         var source = new SoftwareBitmapSource();
-
                         source.SetBitmapAsync(inputImage.SoftwareBitmap);
 
-                        //m.Source = source;
-
-
+                        //Create alarm image
                         var lossStr = new ResultModel
                         {
                             Name = label,
-
                             Percent = maxValue * 100.0f,
-
                             Image = source
                         };
 
-                        //loss.Select(l => new ResultModel()
-
-                        //{
-
-                        //    Name = l.Key,
-
-                        //    Percent = l.Value * 100.0f,
-
-                        //    Image = source
-
-                        //}).FirstOrDefault();
-
-
+                        
                         resultsList.Insert(0, lossStr);
                         PlaySound();
                     });
@@ -148,44 +132,36 @@ namespace SantaClausAlert
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
+            //File picker
             var fileOpenPicker = new FileOpenPicker();
-
             fileOpenPicker.SuggestedStartLocation = PickerLocationId.PicturesLibrary;
-
             fileOpenPicker.FileTypeFilter.Add(".bmp");
-
             fileOpenPicker.FileTypeFilter.Add(".jpg");
-
             fileOpenPicker.FileTypeFilter.Add(".png");
-
             fileOpenPicker.ViewMode = PickerViewMode.Thumbnail;
-
             var selectedStorageFile = await fileOpenPicker.PickSingleFileAsync();
-
+            //Check file selected
+            if (selectedStorageFile == null)
+                return;
             SoftwareBitmap softwareBitmap;
 
             using (var stream = await selectedStorageFile.OpenAsync(FileAccessMode.Read))
 
             {
                 // Create the decoder from the stream 
-
                 var decoder = await BitmapDecoder.CreateAsync(stream);
-
                 // Get the SoftwareBitmap representation of the file in BGRA8 format
-
                 softwareBitmap = await decoder.GetSoftwareBitmapAsync();
-
-
                 softwareBitmap = SoftwareBitmap.Convert(softwareBitmap, BitmapPixelFormat.Bgra8,
                     BitmapAlphaMode.Premultiplied);
             }
 
             var inputImage = VideoFrame.CreateWithSoftwareBitmap(softwareBitmap);
-
             EvaluateVideoFrameAsync(inputImage);
         }
 
 
+        //Crop the image
         public static IAsyncOperation<VideoFrame> CenterCropImageAsync(VideoFrame inputVideoFrame, uint targetWidth,
             uint targetHeight)
         {
@@ -210,37 +186,24 @@ namespace SantaClausAlert
                         if (inputVideoFrame.Direct3DSurface == null)
                             throw new Exception("Invalid VideoFrame without SoftwareBitmap nor D3DSurface");
 
-
                         result = new VideoFrame(BitmapPixelFormat.Bgra8,
                             (int) targetWidth,
                             (int) targetHeight,
                             BitmapAlphaMode.Premultiplied);
                     }
-
-
                     else
-
-
                     {
                         result = new VideoFrame(BitmapPixelFormat.Bgra8,
                             (int) targetWidth,
                             (int) targetHeight,
                             BitmapAlphaMode.Premultiplied);
                     }
-
-
                     await inputVideoFrame.CopyToAsync(result);
                 }
-
-
-                catch (Exception ex)
-
-
+               catch (Exception ex)
                 {
                     Debug.WriteLine(ex.ToString());
                 }
-
-
                 return result;
             });
         }
@@ -257,12 +220,14 @@ namespace SantaClausAlert
 
         private async void ButtonVideo_OnClick(object sender, RoutedEventArgs e)
         {
+            //Play video
             await CameraPreviewControl.StartAsync();
             CameraPreviewControl.CameraHelper.FrameArrived += CameraPreviewControl_FrameArrived;
         }
 
         private async void ButtonVideoClose_OnClick(object sender, RoutedEventArgs e)
         {
+            //Stop video
             CameraPreviewControl.CameraHelper.FrameArrived -= CameraPreviewControl_FrameArrived;
             CameraPreviewControl.Stop();
         }
