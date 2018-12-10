@@ -50,30 +50,29 @@
                 Grid.Row="2"
                 IsFrameSourceGroupButtonVisible="True" />
         </Grid>
-        <ListView
-            x:Name="ListViewResults"
-            Grid.Column="1"
-            ItemsSource="{Binding}">
+        <StackPanel Grid.Column="1">
+            <TextBlock>Alarms</TextBlock>
+            <ListView x:Name="ListViewResults" ItemsSource="{Binding}">
 
-            <ListView.ItemTemplate>
+                <ListView.ItemTemplate>
 
-                <DataTemplate>
+                    <DataTemplate>
 
-                    <StackPanel>
+                        <StackPanel>
 
-                        <Image Source="{Binding Image}" />
+                            <Image Source="{Binding Image}" />
 
 
-                        <TextBlock Text="{Binding Info}" />
+                            <TextBlock Text="{Binding Info}" />
 
-                    </StackPanel>
+                        </StackPanel>
 
-                </DataTemplate>
+                    </DataTemplate>
 
-            </ListView.ItemTemplate>
+                </ListView.ItemTemplate>
 
-        </ListView>
-
+            </ListView>
+        </StackPanel>
 
     </Grid>
 </Page>
