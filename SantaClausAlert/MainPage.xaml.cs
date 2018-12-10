@@ -48,24 +48,20 @@ namespace SantaClausAlert
                 return;
 
             //Read frame
-            var videoFrame = e.VideoFrame;
             var softwareBitmap = e.VideoFrame.SoftwareBitmap;
             var targetSoftwareBitmap = softwareBitmap;
             if (softwareBitmap != null)
 
             {
                 //Convert to compatible bitmap
-                if (softwareBitmap.BitmapPixelFormat != BitmapPixelFormat.Bgra8 ||
-                    softwareBitmap.BitmapAlphaMode == BitmapAlphaMode.Straight)
-                    targetSoftwareBitmap = SoftwareBitmap.Convert(softwareBitmap, BitmapPixelFormat.Bgra8,
-                        BitmapAlphaMode.Premultiplied);
+                if (softwareBitmap.BitmapPixelFormat != BitmapPixelFormat.Bgra8 || softwareBitmap.BitmapAlphaMode == BitmapAlphaMode.Straight)
+                    targetSoftwareBitmap = SoftwareBitmap.Convert(softwareBitmap, BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied);
 
                 var inputImage = VideoFrame.CreateWithSoftwareBitmap(targetSoftwareBitmap);
 
                 //Evaluate frame
                 EvaluateVideoFrameAsync(inputImage);
 
-                //await softwareBitmapSource.SetBitmapAsync(targetSoftwareBitmap);
             }
         }
 
@@ -77,9 +73,6 @@ namespace SantaClausAlert
 
             //Evaluate the model
             ModelOutput = await ModelGen.EvaluateAsync(ModelInput);
-
-            //Convert result
-            var res = ModelOutput.ClassLabel.GetAsVectorView().ToList();
 
             //If no results
             if (ModelOutput.Loss == null || ModelOutput.Loss.Count == 0)
@@ -100,7 +93,6 @@ namespace SantaClausAlert
 
                     {
                         //Get current image
-                        var m = new Image();
                         var source = new SoftwareBitmapSource();
                         source.SetBitmapAsync(inputImage.SoftwareBitmap);
 
