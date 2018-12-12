@@ -11,21 +11,14 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-
             <ColumnDefinition Width="*" />
-
             <ColumnDefinition Width="300" />
-
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="0">
             <Grid.RowDefinitions>
-
                 <RowDefinition Height="Auto" />
-
                 <RowDefinition Height="Auto" />
-
                 <RowDefinition Height="*" />
-
             </Grid.RowDefinitions>
             <MediaElement x:Name="me" />
             <StackPanel Margin="10" Orientation="Horizontal">
@@ -53,26 +46,15 @@
         <StackPanel Grid.Column="1">
             <TextBlock>Alarms</TextBlock>
             <ListView x:Name="ListViewResults" ItemsSource="{Binding}">
-
                 <ListView.ItemTemplate>
-
                     <DataTemplate>
-
                         <StackPanel>
-
                             <Image Source="{Binding Image}" />
-
-
                             <TextBlock Text="{Binding Info}" />
-
                         </StackPanel>
-
                     </DataTemplate>
-
                 </ListView.ItemTemplate>
-
             </ListView>
         </StackPanel>
-
     </Grid>
 </Page>
